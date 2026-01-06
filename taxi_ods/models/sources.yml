@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: borough
+      - name: neighborhood
+      - name: taxi_trip
+      - name: weather

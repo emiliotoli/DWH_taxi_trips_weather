@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: ods_borough
+    columns:
+      - name: id_borough
+        tests:
+          - not_null
+          - unique
+
+  - name: ods_neighborhood
+    columns:
+      - name: id_neighborhood
+        tests:
+          - not_null
+          - unique
+
+  - name: ods_taxi_trip
+    columns:
+      - name: id_taxi_trip
+        tests:
+          - not_null
+          - unique
+
+  - name: ods_weather
+    columns:
+      - name: id_weather
+        tests:
+          - not null
+          - unique
