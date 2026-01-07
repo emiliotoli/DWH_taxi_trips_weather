@@ -76,10 +76,34 @@ def init_weather(con):
     """)
 
 
+def init_files_dictionary(con):
+    vendor_path = (DATA_DIR / 'taxi_trip/vendor_id.csv')
+    ratecode_path = (DATA_DIR / 'taxi_trip/ratecode_id.csv')
+    payment_type_path = (DATA_DIR / 'taxi_trip/payment_type.csv')
+    con.execute(f"""
+        CREATE OR REPLACE VIEW raw.vendor_id AS
+        SELECT *
+        FROM read_csv_auto('{vendor_path}', header=True)
+        
+    """)
+    con.execute(f"""
+            CREATE OR REPLACE VIEW raw.ratecode_id AS
+            SELECT *
+            FROM read_csv_auto('{ratecode_path}', header=True)
+
+        """)
+    con.execute(f"""
+            CREATE OR REPLACE VIEW raw.payment_type AS
+            SELECT *
+            FROM read_csv_auto('{payment_type_path}', header=True)
+        """)
+
+
 if __name__ == "__main__":
     print("Inizio init_duckdb...")
     con=init_duckdb()
-    init_zones(con)
-    init_taxi_trips(con)
-    init_weather(con)
+    #init_zones(con)
+    #init_taxi_trips(con)
+    #init_weather(con)
+    init_files_dictionary(con)
     print("Fine init_duckdb.")

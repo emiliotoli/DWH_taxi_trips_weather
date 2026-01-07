@@ -8,3 +8,6 @@ sources:
       - name: neighborhood
       - name: taxi_trip
       - name: weather
+      - name: payment_type
+      - name: vendor_id
+      - name: ratecode_id

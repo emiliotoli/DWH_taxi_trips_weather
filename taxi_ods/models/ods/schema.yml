@@ -28,3 +28,24 @@ models:
         tests:
           - not null
           - unique
+
+  - name: ods_ratecode
+    columns:
+      - name: id_ratecode
+        tests:
+          - not null
+          - unique
+
+  - name: ods_payment_type
+    columns:
+      - name: id_payment_type
+        tests:
+          - not null
+          - unique
+
+  - name: ods_vendor
+    columns:
+      - name: id_vendor
+        tests:
+          - not null
+          - unique

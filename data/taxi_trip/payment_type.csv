@@ -1,0 +1,8 @@
+id,type
+0, "flex fare trip"
+1, "credit card"
+2, "cash"
+3, "no charge"
+4, "dispute"
+5, "unknown"
+6, "voided trip"
