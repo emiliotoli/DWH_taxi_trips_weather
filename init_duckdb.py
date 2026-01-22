@@ -11,6 +11,7 @@ def init_duckdb():
 
     con.execute('CREATE SCHEMA IF NOT EXISTS raw;')
     con.execute('CREATE SCHEMA IF NOT EXISTS ods;')
+    con.execute('CREATE SCHEMA IF NOT EXISTS datamart')
     return con
 
 
@@ -105,5 +106,5 @@ if __name__ == "__main__":
     #init_zones(con)
     #init_taxi_trips(con)
     #init_weather(con)
-    init_files_dictionary(con)
+    #init_files_dictionary(con)
     print("Fine init_duckdb.")

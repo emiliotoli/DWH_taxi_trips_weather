@@ -11,3 +11,9 @@ sources:
       - name: payment_type
       - name: vendor_id
       - name: ratecode_id
+
+  - name: ods
+    schema: ods
+    tables:
+      - name: ods_borough
+      - name: ods_neighborhood
