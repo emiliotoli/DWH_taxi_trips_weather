@@ -103,8 +103,8 @@ def init_files_dictionary(con):
 if __name__ == "__main__":
     print("Inizio init_duckdb...")
     con=init_duckdb()
-    #init_zones(con)
-    #init_taxi_trips(con)
-    #init_weather(con)
-    #init_files_dictionary(con)
+    init_zones(con)
+    init_taxi_trips(con)
+    init_weather(con)
+    init_files_dictionary(con)
     print("Fine init_duckdb.")

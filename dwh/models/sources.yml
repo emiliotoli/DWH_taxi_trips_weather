@@ -13,9 +13,12 @@ sources:
       - name: ratecode_id
 
   - name: ods
-    schema: ods
+    schema: dwh_ods
     tables:
       - name: ods_borough
       - name: ods_neighborhood
       - name: ods_weather
       - name: ods_vendor
+      - name: ods_taxi_trip
+      - name: ods_payment_type
+      - name: ods_ratecode

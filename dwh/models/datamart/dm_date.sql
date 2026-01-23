@@ -16,7 +16,7 @@ WITH date_spine AS (
 
 SELECT
     -- Chiave surrogata (formato YYYYMMDD, es: 20240615)
-    CAST(strftime(date_value, '%Y%m%d') AS INTEGER) AS date_key,
+    CAST(strftime(date_value, '%Y%m%d') AS INTEGER) AS key_date,
 
     -- Data completa
     date_value AS date,
