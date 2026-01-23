@@ -18,3 +18,4 @@ sources:
       - name: ods_borough
       - name: ods_neighborhood
       - name: ods_weather
+      - name: ods_vendor
