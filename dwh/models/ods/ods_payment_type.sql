@@ -2,14 +2,18 @@
     materialized='table',
 )}}
 
-with src AS (
+with src as (
     select
         cast(id as integer) as id_payment_type,
-        lower(trim(type)) as payment_type
-    FROM
-        {{ source('raw','payment_type')}}
 
-),
+        -- normalizzazione: trim + lower + spazi multipli → singolo spazio
+        nullif(
+            regexp_replace(lower(trim(type)), '\s+', ' '),
+            ''
+        ) as payment_type
+    from {{ source('raw','payment_type') }}
+    ),
+
     clean as (
 
         select
@@ -17,19 +21,22 @@ with src AS (
             payment_type
         from src
         where payment_type is not null
+        and payment_type is not null
     ),
 
     deduplicated as (
 
-        select distinct
+        select
             id_payment_type,
-            payment_type
+            min(payment_type) as payment_type
         from clean
-    ),
-    final as (select id_payment_type,
+        group by id_payment_type
+        ),
+
+    final_table as (select id_payment_type,
                      payment_type,
                      current_timestamp as last_update
               from deduplicated
               )
 
-select * from final
+select * from final_table

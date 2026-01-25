@@ -11,6 +11,20 @@ with src as (
     from {{source('raw', 'neighborhood')}}
 ),
 
+src_dedup as (
+    select *
+    from (
+        select
+            s.*,
+            row_number() over (
+                partition by id_neighborhood
+                order by borough_name, neighborhood_name, service_zone
+            ) as rn
+        from src s
+    ) x
+    where rn = 1
+),
+
 boroughs as (
     select
         id_borough,
@@ -20,7 +34,7 @@ boroughs as (
 
 joined as (
     select s.id_neighborhood,
-           b.id_borough as borough_fk,
+           coalesce(b.id_borough, -1) as borough_fk,
            s.neighborhood_name,
            s.service_zone,
            current_timestamp as last_update

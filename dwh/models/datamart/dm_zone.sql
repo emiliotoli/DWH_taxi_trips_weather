@@ -51,7 +51,7 @@ records_to_close AS (
         t.key_zone,
         t.id_neighborhood,
         t.neighborhood_name,
-        t.borough_name,
+        coalesce(b.borough_name, 'Unknown') as borough_name,
         t.service_zone,
         t.valid_from,
         o.ods_update_time AS valid_to,

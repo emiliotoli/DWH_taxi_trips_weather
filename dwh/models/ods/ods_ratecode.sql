@@ -6,25 +6,34 @@ with src as (
 
     select
         cast(id as integer) as id_ratecode,
-        trim(ratecode) as ratecode_name
+        nullif(
+            regexp_replace(trim(ratecode), '\s+', ' '),
+            ''
+        ) as ratecode_name
     from {{ source('raw', 'ratecode_id')}}
 ),
-    deduplicated as (
-        select distinct
+
+    clean as (
+        select
             id_ratecode,
             ratecode_name
         from src
-    ),
-    clean as (
-        select *
-        from deduplicated
-        where ratecode_name is not null
+        where id_ratecode is not null
+          and ratecode_name is not null
     ),
 
-    final as (
+    deduplicated as (
+        select
+            id_ratecode,
+            min(ratecode_name) as ratecode_name
+        from clean
+        group by id_ratecode
+        ),
+
+    final_table as (
         select * ,
                current_timestamp as last_update
         from clean
     )
 
-select * from final
+select * from final_table

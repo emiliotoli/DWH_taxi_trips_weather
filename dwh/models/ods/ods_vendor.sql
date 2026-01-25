@@ -5,28 +5,36 @@
 with src as (
     select
         cast(id as integer) as id_vendor,
-        trim(vendor) as vendor_name
+        nullif(
+            regexp_replace(trim(vendor), '\s+', ' '),
+            ''
+        ) as vendor_name
     from
         {{ source('raw', 'vendor_id')}}
 ),
-    deduplicated as
-        (select distinct
-            id_vendor,
-            vendor_name
-        from src),
     clean as (
-        select
-            id_vendor,
-            vendor_name
-        from deduplicated
-        where vendor_name is not null
+    select
+        id_vendor,
+        vendor_name
+    from src
+    where id_vendor is not null
+      and vendor_name is not null
     ),
-    final as (
+
+    deduplicated as (
+    select
+        id_vendor,
+        min(vendor_name) as vendor_name
+    from clean
+    group by id_vendor
+    ),
+
+    final_table as (
         select
             id_vendor,
             vendor_name,
             current_timestamp as last_update
-        from clean
+        from deduplicated
     )
 
-select * from final
+select * from final_table

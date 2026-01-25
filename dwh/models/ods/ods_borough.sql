@@ -3,14 +3,19 @@
 )}}
 
 with src as (
-    select * from {{ source('raw' , 'borough')}}
+    select
+        nullif(
+            regexp_replace(lower(trim(boroughname)), '\s+', ' '),
+            ''
+        ) as borough_name
+    from {{ source('raw', 'borough') }}
 ),
 
 clean as (
     select
-        trim(boroughname) as borough_name
+        borough_name
     from src
-    where trim(boroughname) is not null
+    where trim(borough_name) is not null
 ),
 
 dedup as (
@@ -18,12 +23,19 @@ dedup as (
     from clean
 ),
 
-with_columns as (
+final_table as (
     select
-        row_number() over (order by borough_name) as id_borough,
+        -1 as id_borough,
+        'unknown' as borough_name,
+        {{ dbt.current_timestamp() }} as last_update
+
+    union all
+
+    select
+        {{ dbt_utils.generate_surrogate_key(['borough_name']) }},
         borough_name,
-        CURRENT_TIMESTAMP as last_update
+        {{ dbt.current_timestamp() }}
     from dedup
 )
 
-select * from with_columns
+select * from final_table

@@ -52,8 +52,8 @@ with_borough_name as (
         o.wind_speed_mean,
         o.wind_speed_min,
         o.weather_code,
-        b.borough_name AS borough_name
-    FROM from_ods as o JOIN {{source("ods", "ods_borough")}} as b
+        coalesce(b.borough_name, 'Unknown') AS borough_name
+    FROM from_ods as o LEFT JOIN {{source("ods", "ods_borough")}} as b
     ON o.borough_fk = b.id_borough
 
 )

@@ -41,11 +41,11 @@ def init_taxi_trips(con):
 
 
 def init_weather(con):
-    manhattan_path = (DATA_DIR / 'weather/open-meteo-Manhattan.csv').as_posix()
-    brooklyn_path = (DATA_DIR / 'weather/open-meteo-Brooklyn.csv').as_posix()
-    bronx_path = (DATA_DIR / 'weather/open-meteo-Bronx.csv').as_posix()
-    queens_path = (DATA_DIR / 'weather/open-meteo-Queens.csv').as_posix()
-    statenisland_path = (DATA_DIR / 'weather/open-meteo-StatenIsland.csv').as_posix()
+    manhattan_path = (DATA_DIR / 'weather/Weather_Manhattan/*.csv').as_posix()
+    brooklyn_path = (DATA_DIR / 'weather/Weather_Brooklyn/*.csv').as_posix()
+    bronx_path = (DATA_DIR / 'weather/Weather_Bronx/*.csv').as_posix()
+    queens_path = (DATA_DIR / 'weather/Weather_Queens/*.csv').as_posix()
+    statenisland_path = (DATA_DIR / 'weather/Weather_StatenIsland/*.csv').as_posix()
 
     con.execute(f"""
     CREATE OR REPLACE VIEW raw.weather AS
@@ -103,8 +103,8 @@ def init_files_dictionary(con):
 if __name__ == "__main__":
     print("Inizio init_duckdb...")
     con=init_duckdb()
-    init_zones(con)
+    #init_zones(con)
     init_taxi_trips(con)
-    init_weather(con)
-    init_files_dictionary(con)
+    #init_weather(con)
+    #init_files_dictionary(con)
     print("Fine init_duckdb.")

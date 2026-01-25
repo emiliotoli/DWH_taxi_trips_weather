@@ -14,7 +14,7 @@
 
 WITH from_ods AS (
     SELECT
-        o.id_taxi_trip,
+        o.trip_id,
         o.pickup_datetime,
         o.dropoff_datetime,
         o.passenger_count,
@@ -115,7 +115,7 @@ ratecode_lookup AS (
 fact_data AS (
 SELECT
 NEXTVAL('trip_seq') AS key_taxi_trip,
-o.id_taxi_trip,
+o.trip_id,
 ---- FOREIGN KEYS ----
 COALESCE(v.key_vendor, -1) AS key_vendor,
 COALESCE(zp.key_zone, -1) AS key_zone_pickup,

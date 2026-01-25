@@ -6,7 +6,7 @@
 
 with src as (
     SELECT
-        borough_name,
+        trim(borough_name) as borough_name,
         cast(time as date) as weather_date,
         cast("temperature_2m_mean (°C)" as double) as temperature_mean,
         cast("temperature_2m_min (°C)" as double) as temperature_min,
@@ -27,6 +27,7 @@ with src as (
         cast("weather_code (wmo code)" as integer) as weather_code
 
     FROM {{ source('raw' , 'weather') }}
+    WHERE time is not null
 ),
 
     filtered as (
@@ -37,6 +38,22 @@ with src as (
                 select max(weather_date) from {{ this }}
                 )
         {% endif %}
+    ),
+
+    dedup as (
+        select *
+        from (
+            select
+                f.*,
+                row_number() over (
+                    partition by borough_key, weather_date
+                    order by
+                        temperature_mean desc nulls last,
+                        wind_speed_mean desc nulls last
+                ) as rn
+            from filtered f
+        ) x
+        where rn = 1
     ),
 
     borough as (
