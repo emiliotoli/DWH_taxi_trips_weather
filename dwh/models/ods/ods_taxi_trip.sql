@@ -18,9 +18,12 @@ filtered as (
         AND tpep_dropoff_datetime > tpep_pickup_datetime
         AND tpep_pickup_datetime >= '2000-01-01'
         {% if is_incremental() %}
-        AND tpep_pickup_datetime > (
-            select max(pickup_datetime) from {{this}}
-        )
+        and tpep_pickup_datetime >= (
+          coalesce(
+              (select max(pickup_datetime) from {{ this }}),
+              timestamp '2000-01-01'
+          ) - interval '7 days'
+      )
         {% endif %}
 ),
 
@@ -43,15 +46,15 @@ transformed as (
         tpep_pickup_datetime as pickup_datetime,
         tpep_dropoff_datetime as dropoff_datetime,
         ---- IDs
-        cast(VendorID as integer) as id_vendor,
-        cast(PULocationID as integer) as pickup_neighborhood_fk,
-        cast(DOLocationID as integer) as dropoff_neighborhood_fk,
-        cast(RatecodeID as integer) as rate_code_id,
+        cast(VendorID as integer) as vendor_fk,
+        coalesce(CAST(pu.id_neighborhood AS INTEGER), -1) as pickup_neighborhood_fk,
+        coalesce(CAST(do.id_neighborhood AS INTEGER), -1) as dropoff_neighborhood_fk,
+        cast(RatecodeID as integer) as rate_code_fk,
         ---- FLAG
         store_and_fwd_flag,
         cast(passenger_count as integer) as passenger_count,
         trip_distance,
-        cast(payment_type as integer)    as payment_type,
+        cast(payment_type as integer)    as payment_type_fk,
         GREATEST(fare_amount, 0) AS fare_amount,
         extra,
         mta_tax,
@@ -63,6 +66,10 @@ transformed as (
         total_amount,
         current_timestamp as last_update
     from filtered f
+    left join neighborhood pu
+        on cast(f.PULocationID as integer) = pu.id_neighborhood
+    left join neighborhood do
+        on cast(f.DOLocationID as integer) = do.id_neighborhood
 )
 
 select * from transformed

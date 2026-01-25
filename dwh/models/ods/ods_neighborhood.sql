@@ -7,7 +7,10 @@ with src as (
         cast(LocationID as Integer) as id_neighborhood,
         trim(Borough) as borough_name,
         trim(Zone) as neighborhood_name,
-        trim(service_zone) as service_zone
+        trim(service_zone) as service_zone,
+        lower(
+          nullif(regexp_replace(trim(Borough), '\s+', ' '), '')
+        ) as borough_key
     from {{source('raw', 'neighborhood')}}
 ),
 
@@ -28,7 +31,8 @@ src_dedup as (
 boroughs as (
     select
         id_borough,
-        borough_name
+        borough_name,
+        lower(nullif(regexp_replace(trim(borough_name), '\s+', ' '), '')) as borough_key
     from {{ ref('ods_borough')}}
 ),
 
@@ -38,8 +42,14 @@ joined as (
            s.neighborhood_name,
            s.service_zone,
            current_timestamp as last_update
-    from src s
-    left join boroughs b on s.borough_name = b.borough_name
+    from src_dedup s
+    left join boroughs b on s.borough_key=b.borough_key
 )
 
-select * from joined
+select
+    id_neighborhood,
+    borough_fk,
+    neighborhood_name,
+    service_zone,
+    last_update
+from joined

@@ -27,15 +27,16 @@ final_table as (
     select
         -1 as id_borough,
         'unknown' as borough_name,
-        {{ dbt.current_timestamp() }} as last_update
+        CURRENT_TIMESTAMP as last_update
 
     union all
 
     select
-        {{ dbt_utils.generate_surrogate_key(['borough_name']) }},
+        md5(borough_name) as id_borough,
         borough_name,
-        {{ dbt.current_timestamp() }}
+        CURRENT_TIMESTAMP AS last_update
     from dedup
+    where borough_name <> 'unknown'
 )
 
 select * from final_table

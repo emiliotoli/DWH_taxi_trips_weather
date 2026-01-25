@@ -31,10 +31,10 @@ WITH from_ods AS (
         o.last_update AS ods_update_time,
         o.pickup_neighborhood_fk,
         o.dropoff_neighborhood_fk,
-        o.rate_code_id,
-        o.id_vendor,
+        o.rate_code_FK,
+        o.vendor_FK,
         o.store_and_fwd_flag,
-        o.payment_type
+        o.payment_type_fk
     FROM {{ source("ods", "ods_taxi_trip") }} as o
     {% if is_incremental() %}
     WHERE ods_update_time > (
@@ -150,14 +150,14 @@ o.total_amount,
  CAST(EXTRACT(EPOCH FROM (o.dropoff_datetime - o.pickup_datetime)) / 60 AS DECIMAL(10,2)) AS trip_duration_minutes
 
 FROM from_ods as o
-LEFT JOIN vendor_lookup as v ON o.id_vendor = v.id_vendor
+LEFT JOIN vendor_lookup as v ON o.vendor_fk = v.id_vendor
 LEFT JOIN zone_pickup_lookup AS zp ON o.pickup_neighborhood_fk = zp.id_neighborhood
 LEFT JOIN zone_dropoff_lookup AS zd ON o.dropoff_neighborhood_fk = zd.id_neighborhood
 LEFT JOIN date_pickup_lookup AS dp ON CAST(o.pickup_datetime AS DATE) = dp.date
 LEFT JOIN date_dropoff_lookup AS dd ON CAST(o.dropoff_datetime AS DATE) = dd.date
 LEFT JOIN weather_lookup AS wl ON zp.borough_name = wl.borough_name AND CAST(o.pickup_datetime AS DATE) = wl.weather_date
-LEFT JOIN payment_type_lookup AS pt ON pt.id_payment_type = o.payment_type
-LEFT JOIN ratecode_lookup AS rl ON rl.id_ratecode = o.rate_code_id
+LEFT JOIN payment_type_lookup AS pt ON pt.id_payment_type = o.payment_type_fk
+LEFT JOIN ratecode_lookup AS rl ON rl.id_ratecode = o.rate_code_fk
 
 )
 
