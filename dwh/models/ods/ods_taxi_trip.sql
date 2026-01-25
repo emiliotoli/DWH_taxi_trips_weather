@@ -47,8 +47,8 @@ transformed as (
         tpep_dropoff_datetime as dropoff_datetime,
         ---- IDs
         cast(VendorID as integer) as vendor_fk,
-        coalesce(CAST(pu.id_neighborhood AS INTEGER), -1) as pickup_neighborhood_fk,
-        coalesce(CAST(do.id_neighborhood AS INTEGER), -1) as dropoff_neighborhood_fk,
+        coalesce(pu.id_neighborhood, -1) as pickup_neighborhood_fk,
+        coalesce(dof.id_neighborhood, -1) as dropoff_neighborhood_fk,
         cast(RatecodeID as integer) as rate_code_fk,
         ---- FLAG
         store_and_fwd_flag,
@@ -68,8 +68,8 @@ transformed as (
     from filtered f
     left join neighborhood pu
         on cast(f.PULocationID as integer) = pu.id_neighborhood
-    left join neighborhood do
-        on cast(f.DOLocationID as integer) = do.id_neighborhood
+    left join neighborhood dof
+        on cast(f.DOLocationID as integer) = dof.id_neighborhood
 )
 
 select * from transformed

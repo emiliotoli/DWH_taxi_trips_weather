@@ -46,7 +46,7 @@ with src as (
             select
                 f.*,
                 row_number() over (
-                    partition by borough_key, weather_date
+                    partition by borough_name, weather_date
                     order by
                         temperature_mean desc nulls last,
                         wind_speed_mean desc nulls last
@@ -81,7 +81,7 @@ with src as (
         f.weather_code,
         current_timestamp  as last_update
 
-        from filtered f join borough b on f.borough_name = b.borough_name
+        from dedup f join borough b on f.borough_name = b.borough_name
 
     ),
 

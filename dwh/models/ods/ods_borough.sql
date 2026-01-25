@@ -2,6 +2,7 @@
     materialized= 'table'
 )}}
 
+
 with src as (
     select
         nullif(
@@ -32,7 +33,7 @@ final_table as (
     union all
 
     select
-        md5(borough_name) as id_borough,
+        row_number() over (order by borough_name) as id_borough,
         borough_name,
         CURRENT_TIMESTAMP AS last_update
     from dedup
