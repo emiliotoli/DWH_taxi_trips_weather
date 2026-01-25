@@ -1,7 +1,7 @@
 {{ config(
     materialized='incremental',
     unique_key='id_trip',
-    on_schema_change='sync_all_columns'
+    on_schema_change='merge'
 ) }}
 
 with src as (
@@ -22,7 +22,7 @@ filtered as (
           coalesce(
               (select max(pickup_datetime) from {{ this }}),
               timestamp '2000-01-01'
-          ) - interval '7 days'
+          ) - interval '1 day'
       )
         {% endif %}
 ),
@@ -41,7 +41,7 @@ transformed as (
             cast(VendorID as varchar),
             cast(tpep_pickup_datetime as varchar),
             cast(tpep_dropoff_datetime as varchar)
-        ) as trip_id,
+        ) as id_trip,
         ---- TIMESTAMPS
         tpep_pickup_datetime as pickup_datetime,
         tpep_dropoff_datetime as dropoff_datetime,
@@ -56,10 +56,10 @@ transformed as (
         trip_distance,
         cast(payment_type as integer)    as payment_type_fk,
         GREATEST(fare_amount, 0) AS fare_amount,
-        extra,
+        GREATEST(extra, 0) AS extra,
         mta_tax,
-        tip_amount,
-        tolls_amount,
+        GREATEST(tip_amount, 0) AS tip_amount,
+        GREATEST(tolls_amount, 0) AS tolls_amount,
         improvement_surcharge,
         congestion_surcharge,
         airport_fee,

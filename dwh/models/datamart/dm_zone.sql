@@ -51,7 +51,7 @@ records_to_close AS (
         t.key_zone,
         t.id_neighborhood,
         t.neighborhood_name,
-        coalesce(b.borough_name, 'Unknown') as borough_name,
+        coalesce(t.borough_name, 'unknown') as borough_name,
         t.service_zone,
         t.valid_from,
         o.ods_update_time AS valid_to,
@@ -60,6 +60,7 @@ records_to_close AS (
     INNER JOIN from_ods AS o
         ON t.neighborhood_name = o.neighborhood_name
         AND t.borough_name = o.borough_name
+        AND is_current = true
     WHERE t.key_zone IN (SELECT key_zone FROM changed_records)
 ),
 

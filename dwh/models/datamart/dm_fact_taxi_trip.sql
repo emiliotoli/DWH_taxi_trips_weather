@@ -14,7 +14,7 @@
 
 WITH from_ods AS (
     SELECT
-        o.trip_id,
+        o.id_trip,
         o.pickup_datetime,
         o.dropoff_datetime,
         o.passenger_count,
@@ -35,7 +35,7 @@ WITH from_ods AS (
         o.vendor_FK,
         o.store_and_fwd_flag,
         o.payment_type_fk
-    FROM {{ source("ods", "ods_taxi_trip") }} as o
+    FROM {{ ref('ods_taxi_trip') }} as o
     {% if is_incremental() %}
     WHERE ods_update_time > (
                 SELECT COALESCE(MAX(time), '1900-01-01 00:00:00')
@@ -100,14 +100,14 @@ payment_type_lookup AS (
     SELECT
         id_payment_type,
         payment_type
-    FROM {{source("ods", "ods_payment_type")}}
+    FROM {{ ref('ods_payment_type')}}
 ),
 
 ratecode_lookup AS (
     SELECT
         id_ratecode,
         ratecode_name
-    FROM {{source("ods", "ods_ratecode")}}
+    FROM {{ ref('ods_ratecode')}}
 ),
 
 ----------------------------
@@ -115,7 +115,7 @@ ratecode_lookup AS (
 fact_data AS (
 SELECT
 NEXTVAL('trip_seq') AS key_taxi_trip,
-o.trip_id,
+o.id_trip,
 ---- FOREIGN KEYS ----
 COALESCE(v.key_vendor, -1) AS key_vendor,
 COALESCE(zp.key_zone, -1) AS key_zone_pickup,

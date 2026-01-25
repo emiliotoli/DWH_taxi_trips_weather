@@ -22,6 +22,7 @@ clean as (
 dedup as (
     select distinct borough_name
     from clean
+    where borough_name <> 'unknown'
 ),
 
 final_table as (
@@ -37,7 +38,6 @@ final_table as (
         borough_name,
         CURRENT_TIMESTAMP AS last_update
     from dedup
-    where borough_name <> 'unknown'
 )
 
 select * from final_table

@@ -25,7 +25,7 @@ WITH from_ods AS (
         o.weather_code,
         o.borough_fk,
         o.last_update as ods_update_time
-    FROM {{ source("ods", "ods_weather")}} as o
+    FROM {{ ref('ods_weather')}} as o
     {% if is_incremental()%}
     WHERE o.last_update > (
         SELECT COALESCE(MAX(time), '1900-01-01 00:00:00')
@@ -52,7 +52,7 @@ with_borough_name as (
         o.wind_speed_mean,
         o.wind_speed_min,
         o.weather_code,
-        coalesce(b.borough_name, 'Unknown') AS borough_name
+        coalesce(b.borough_name, 'unknown') AS borough_name
     FROM from_ods as o LEFT JOIN {{source("ods", "ods_borough")}} as b
     ON o.borough_fk = b.id_borough
 
