@@ -44,6 +44,7 @@ def init_weather(con):
     bronx_path = (DATA_DIR / 'weather/Weather_Bronx/*.csv').as_posix()
     queens_path = (DATA_DIR / 'weather/Weather_Queens/*.csv').as_posix()
     statenisland_path = (DATA_DIR / 'weather/Weather_StatenIsland/*.csv').as_posix()
+    ewr_path = (DATA_DIR / 'weather/Weather_EWR/*.csv').as_posix()
 
     con.execute(f"""
     CREATE OR REPLACE VIEW raw.weather AS
@@ -71,7 +72,11 @@ def init_weather(con):
     'Queens' as borough_name, 
     *
     FROM read_csv_auto('{queens_path}', header=True , skip=3)
-    
+    UNION ALL
+    SELECT 
+    'EWR' as borough_name, 
+    *
+    FROM read_csv_auto('{brooklyn_path}', header=True , skip=3)
     """)
 
 

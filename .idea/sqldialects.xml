@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/.venv/Lib/site-packages/dbt/include/starter_project" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/dwh" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/dwh/models/datamart/dm_zone.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/dwh/models/ods/ods_weather.sql" dialect="GenericSQL" />
