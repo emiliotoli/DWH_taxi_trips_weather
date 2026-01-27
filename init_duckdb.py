@@ -10,8 +10,6 @@ def init_duckdb():
     con = duckdb.connect(str(DB_PATH))
 
     con.execute('CREATE SCHEMA IF NOT EXISTS raw;')
-    con.execute('CREATE SCHEMA IF NOT EXISTS ods;')
-    con.execute('CREATE SCHEMA IF NOT EXISTS datamart')
     return con
 
 

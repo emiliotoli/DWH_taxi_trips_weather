@@ -19,8 +19,8 @@ WITH from_ods AS (
         n.service_zone,
         b.borough_name,
         n.last_update AS ods_update_time
-    FROM {{ source("ods", "ods_borough") }} AS b
-    INNER JOIN {{ source("ods", "ods_neighborhood") }} AS n
+    FROM {{ ref('ods_borough') }} AS b
+    INNER JOIN {{ ref('ods_neighborhood') }} AS n
         ON b.id_borough = n.borough_fk
     {% if is_incremental() %}
     WHERE n.last_update > (
