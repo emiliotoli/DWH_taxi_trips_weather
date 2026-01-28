@@ -147,7 +147,23 @@ o.congestion_surcharge,
 o.airport_fee,
 o.total_amount,
 ---- CALCULATED MEASURE ----
- CAST(EXTRACT(EPOCH FROM (o.dropoff_datetime - o.pickup_datetime)) / 60 AS DECIMAL(10,2)) AS trip_duration_minutes
+CAST(EXTRACT(EPOCH FROM (o.dropoff_datetime - o.pickup_datetime)) / 60 AS DECIMAL(10,2)) AS trip_duration_minutes,
+CASE
+    WHEN o.fare_amount > 0 THEN
+        CAST((o.tip_amount / o.fare_amount * 100) AS DECIMAL(10,2))
+    ELSE 0.00
+END AS tip_percentage,
+CASE
+    WHEN zp.borough_name != zd.borough_name THEN TRUE
+    ELSE FALSE
+END AS is_cross_borough,
+CASE
+    WHEN EXTRACT(HOUR FROM o.pickup_datetime) BETWEEN 5 AND 11 THEN 'Morning Rush'
+    WHEN EXTRACT(HOUR FROM o.pickup_datetime) BETWEEN 12 AND 15 THEN 'Midday'
+    WHEN EXTRACT(HOUR FROM o.pickup_datetime) BETWEEN 16 AND 19 THEN 'Evening Rush'
+    WHEN EXTRACT(HOUR FROM o.pickup_datetime) BETWEEN 20 AND 23 THEN 'Night'
+    ELSE 'Late Night'
+END AS time_of_day_category
 
 FROM from_ods as o
 LEFT JOIN vendor_lookup as v ON o.vendor_fk = v.id_vendor
