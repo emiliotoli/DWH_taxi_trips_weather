@@ -38,7 +38,7 @@ boroughs as (
 
 joined as (
     select s.id_neighborhood,
-           coalesce(b.id_borough, -1) as borough_fk,
+           coalesce(b.id_borough, sha256('unknown')) as borough_fk,
            s.neighborhood_name,
            s.service_zone,
            current_timestamp as last_update

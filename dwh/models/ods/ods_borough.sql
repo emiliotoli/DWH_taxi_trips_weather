@@ -27,14 +27,14 @@ dedup as (
 
 final_table as (
     select
-        -1 as id_borough,
+        sha256('unknown') as id_borough,
         'unknown' as borough_name,
         CURRENT_TIMESTAMP as last_update
 
     union all
 
     select
-        row_number() over (order by borough_name) as id_borough,
+        sha256(borough_name) as id_borough,
         borough_name,
         CURRENT_TIMESTAMP AS last_update
     from dedup

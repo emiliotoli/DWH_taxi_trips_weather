@@ -79,12 +79,12 @@ with src as (
         f.weather_code,
         current_timestamp  as last_update
 
-        from dedup f join borough b on f.borough_name = b.borough_name
+        from dedup f left join borough b on f.borough_name = b.borough_name
 
     ),
 
     final_table as (SELECT concat_ws('_',
-                    cast(coalesce(borough_fk, -1) as varchar),
+                    cast(coalesce(borough_fk, sha256('unknown')) as varchar),
                     cast(weather_date as varchar)
                     ) as id_weather,
                      borough_fk,
