@@ -490,6 +490,3 @@ if __name__ == "__main__":
     df_bst = charts.q_pickup_borough_season_temp(start_date="2024-01-01", end_date="2024-04-01")
     charts.plot_borough_season_temp_heatmap(df_bst, metric="total_revenue")
 
-    # 8) Tip rate by temp category
-    df_tip = charts.q_tip_rate_by_temp(start_date="2024-01-01", end_date="2024-04-01")
-    charts.plot_tip_rate_by_temp(df_tip)
