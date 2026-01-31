@@ -301,7 +301,7 @@ if __name__ == "__main__":
     charts.plot_trips_per_category(
         df_wind_int,
         title="Avg taxi trips per weather record by wind intensity",
-        order = ["No Wind", "Light Wind", "Moderate Wind", "Strong Wind", "Very Strong Wind"],
+        order = ["No Wind", "Light wind", "Moderate Wind", "Strong Wind", "Very Strong Wind"],
     )
 
     # 5) Snow intensity

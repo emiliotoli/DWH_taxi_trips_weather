@@ -96,7 +96,7 @@ SELECT
     -- Is windy
     CASE
         WHEN w.wind_speed = 0 THEN 'No Wind'
-        WHEN w.wind_speed < 19 THEN 'Light wind'
+        WHEN w.wind_speed < 19 THEN 'Light Wind'
         WHEN w.wind_speed < 38 THEN 'Moderate Wind'
         WHEN w.wind_speed < 61 THEN 'Strong Wind'
         ELSE 'Very Strong Wind'
