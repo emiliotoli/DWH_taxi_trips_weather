@@ -39,12 +39,12 @@ def init_taxi_trips(con):
 
 
 def init_weather(con):
-    manhattan_path = (DATA_DIR / 'weather/Weather_Manhattan/*.csv').as_posix()
-    brooklyn_path = (DATA_DIR / 'weather/Weather_Brooklyn/*.csv').as_posix()
-    bronx_path = (DATA_DIR / 'weather/Weather_Bronx/*.csv').as_posix()
-    queens_path = (DATA_DIR / 'weather/Weather_Queens/*.csv').as_posix()
-    statenisland_path = (DATA_DIR / 'weather/Weather_StatenIsland/*.csv').as_posix()
-    ewr_path = (DATA_DIR / 'weather/Weather_EWR/*.csv').as_posix()
+    manhattan_path = (DATA_DIR / 'weather_dt/Weather_Manhattan/*.csv').as_posix()
+    brooklyn_path = (DATA_DIR / 'weather_dt/Weather_Brooklyn/*.csv').as_posix()
+    bronx_path = (DATA_DIR / 'weather_dt/Weather_Bronx/*.csv').as_posix()
+    queens_path = (DATA_DIR / 'weather_dt/Weather_Queens/*.csv').as_posix()
+    statenisland_path = (DATA_DIR / 'weather_dt/Weather_StatenIsland/*.csv').as_posix()
+    ewr_path = (DATA_DIR / 'weather_dt/Weather_EWR/*.csv').as_posix()
 
     con.execute(f"""
     CREATE OR REPLACE VIEW raw.weather AS
@@ -76,7 +76,7 @@ def init_weather(con):
     SELECT 
     'EWR' as borough_name, 
     *
-    FROM read_csv_auto('{brooklyn_path}', header=True , skip=3)
+    FROM read_csv_auto('{ewr_path}', header=True , skip=3)
     """)
 
 
