@@ -131,6 +131,31 @@ class TaxiChartsByBorough:
         """
         return self._load_df(sql, "trips_per_category", "intensity")
 
+    def trip_distance_borough(self) -> pd.DataFrame:
+        sql = f"""
+        select z.borough_name , avg(f.trip_distance)
+        from {self.schema}.dm_fact_taxi_trip f
+        join {self.schema}.dm_zone z
+            on f.key_zone_pickup = z.key_zone
+        WHERE f.Airport_fee = 0
+        GROUP BY z.borough_name
+        """
+        with self._connect() as con:
+            df = con.execute(sql).df()
+
+        # Adatta le colonne
+        df = df.rename(columns={
+            "borough_name": "borough",
+            df.columns[1]: "trips_per_category",
+        })
+        df["intensity"] = "Avg trip distance (airport_fee=0)"
+
+        df["borough"] = df["borough"].astype(str)
+        df["intensity"] = df["intensity"].astype(str)
+        df["trips_per_category"] = df["trips_per_category"].astype(float)
+
+        return df
+
     # ------------------------------------------------------------------
     # PLOTS
     # ------------------------------------------------------------------
@@ -177,7 +202,7 @@ class TaxiChartsByBorough:
         d[color] = d[color].astype(str).str.strip()
         d[x] = d[x].astype(str).str.strip()
 
-        # Se mi dai un ordine, lo impongo davvero (Categorical + sort)
+        # (Categorical + sort)
         if category_order is not None:
             d[color] = pd.Categorical(d[color], categories=category_order, ordered=True)
             d = d.sort_values([x, color])
@@ -207,9 +232,46 @@ class TaxiChartsByBorough:
         fig.show()
         return fig
 
+    def plot_by_trip_distance(
+            self,
+            df: pd.DataFrame,
+            x: str,
+            y: str,
+            color: str,
+            title: str,
+            category_order: Optional[list[str]] = None,
+    ):
+        d = df.copy()
+
+        d[color] = d[color].astype(str).str.strip()
+        d[x] = d[x].astype(str).str.strip()
+
+        category_orders = {color: category_order} if category_order is not None else None
+
+        fig = px.bar(
+            d,
+            x=x,
+            y=y,
+            color=color,
+            barmode="group",
+            text=y,
+            title=title,
+            template="simple_white",
+            category_orders=category_orders,
+        )
+
+        fig.update_traces(texttemplate="%{text:.2f}", textposition="outside", cliponaxis=False)
+        fig.update_xaxes(title_text="Borough")
+
+        fig.update_yaxes(title_text="Avg trip distance (miles or km)")
+
+        fig.update_layout(title_x=0.5)
+        fig.show()
+        return fig
+
 
 # ------------------------------------------------------------------
-# ESEMPIO USO
+# USO
 # ------------------------------------------------------------------
 
 if __name__ == "__main__":
@@ -269,3 +331,27 @@ if __name__ == "__main__":
         color="intensity",
         title="Avg taxi trips per weather record by snow intensity and borough",
     )
+
+    temp_order = ["Extreme Cold", "Freezing", "Cold", "Mild", "Warm", "Hot", "Extreme Heat" ]
+    # Snow intensity by borough
+    df_temp_int = charts.load_intensity_by_borough("temperature_category")
+    charts.plot_by_borough_2(
+        df_temp_int,
+        x='borough',
+        y="trips_per_category",
+        color="intensity",
+        title="Avg taxi trips per weather record by temperature intensity",
+        category_order=temp_order
+    )
+
+    # Snow intensity by borough
+    df_trip_distance = charts.trip_distance_borough()
+    charts.plot_by_trip_distance(
+        df_trip_distance,
+        x="borough",
+        y="trips_per_category",
+        color="intensity",
+        title="taxi trips per average distance (no airport 'La Guardia' and 'JFK' trips)",
+    )
+
+

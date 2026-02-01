@@ -8,7 +8,6 @@ DATA_DIR = BASE_DIR / 'data'
 
 def init_duckdb():
     con = duckdb.connect(str(DB_PATH))
-
     con.execute('CREATE SCHEMA IF NOT EXISTS raw;')
     return con
 
@@ -105,7 +104,7 @@ def init_files_dictionary(con):
 
 if __name__ == "__main__":
     print("Inizio init_duckdb...")
-    con=init_duckdb()
+    con = init_duckdb()
     init_zones(con)
     init_taxi_trips(con)
     init_weather(con)

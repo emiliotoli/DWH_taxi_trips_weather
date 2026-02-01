@@ -49,7 +49,3 @@ models:
         tests:
           - not null
           - unique
-
-  - name: dm_zone
-
-  - name: dm_data

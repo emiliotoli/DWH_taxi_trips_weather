@@ -199,56 +199,31 @@ class TaxiCharts:
         """
         return self._sql(sql)
 
-    def q_pickup_borough_season_temp(
-        self,
-        start_date: str = "2024-01-01",
-        end_date: str = "2024-04-01",
-    ) -> pd.DataFrame:
+    def q_holiday_day_trips_by_neighborhood_pu(self) -> pd.DataFrame:
         sql = f"""
         SELECT
-          zp.borough_name AS pickup_borough,
-          d.season,
-          w.apparent_temperature_category,
-          COUNT(*) AS total_trips,
-          SUM(f.total_amount) AS total_revenue,
-          AVG(f.total_amount) AS avg_fare
+          z.neighborhood_name,
+          COUNT(*) AS trips
         FROM {self.schema}.dm_fact_taxi_trip f
-        JOIN {self.schema}.dm_zone zp
-          ON f.key_zone_pickup = zp.key_zone
-          AND zp.is_current = TRUE
-        JOIN {self.schema}.dm_date d
-          ON f.key_date_pickup = d.key_date
-        LEFT JOIN {self.schema}.dm_weather w
-          ON f.key_weather = w.key_weather
-        WHERE d.date >= '{start_date}'
-          AND d.date <  '{end_date}'
-        GROUP BY
-          zp.borough_name, d.season, w.apparent_temperature_category
-        ORDER BY total_revenue DESC
+        JOIN {self.schema}.dm_date d ON f.key_date_pickup = d.key_date
+        JOIN {self.schema}.dm_zone z ON f.key_zone_pickup = z.key_zone
+        WHERE d.is_holiday IS TRUE
+        GROUP BY z.neighborhood_name
+        ORDER BY trips DESC
         """
         return self._sql(sql)
 
-    def q_tip_rate_by_temp(
-        self,
-        start_date: str = "2024-01-01",
-        end_date: str = "2024-04-01",
-    ) -> pd.DataFrame:
+    def q_holiday_day_trips_by_neighborhood_do(self) -> pd.DataFrame:
         sql = f"""
         SELECT
-          w.apparent_temperature_category,
-          COUNT(*) AS total_trips,
-          SUM(f.tip_amount) AS total_tips,
-          AVG(f.tip_amount) AS avg_tip,
-          (SUM(f.tip_amount) / NULLIF(SUM(f.total_amount),0)) AS tip_rate
+          z.neighborhood_name,
+          COUNT(*) AS trips
         FROM {self.schema}.dm_fact_taxi_trip f
-        JOIN {self.schema}.dm_date d
-          ON f.key_date_pickup = d.key_date
-        LEFT JOIN {self.schema}.dm_weather w
-          ON f.key_weather = w.key_weather
-        WHERE d.date >= '{start_date}'
-          AND d.date <  '{end_date}'
-        GROUP BY w.apparent_temperature_category
-        ORDER BY tip_rate DESC
+        JOIN {self.schema}.dm_date d ON f.key_date_dropoff = d.key_date
+        JOIN {self.schema}.dm_zone z ON f.key_zone_dropoff = z.key_zone
+        WHERE d.is_holiday IS TRUE
+        GROUP BY z.neighborhood_name
+        ORDER BY trips DESC
         """
         return self._sql(sql)
 
@@ -336,35 +311,32 @@ class TaxiCharts:
         fig.show()
         return fig
 
-    def plot_revenue_by_year_month(
-        self,
-        df: pd.DataFrame,
-        title: str = "Revenue by year and month",
-    ):
-        # Crea un asse ordinabile anche senza conoscere l'ordine dei month_name
-        d = df.copy()
-        d["year"] = d["year"].astype(int)
-
-        fig = px.line(
-            d,
-            x="month_name",
-            y="revenue",
-            color="year",
-            markers=True,
-            title=title,
-            template="simple_white",
-        )
-        fig.update_yaxes(title_text="Revenue", tickformat="$~s")
-        fig.update_xaxes(title_text="Month")
-        fig.update_layout(title_x=0.5)
-        fig.show()
-        return fig
-
     def plot_christmas_trips_top_neighborhoods_pu(
         self,
         df: pd.DataFrame,
         top_n: int = 10,
         title: str = "Christmas Day - top pickup neighborhoods by trips",
+    ):
+        d = df.head(top_n).copy()
+        fig = px.bar(
+            d,
+            x="trips",
+            y="neighborhood_name",
+            orientation="h",
+            title=title,
+            template="simple_white",
+        )
+        fig.update_yaxes(title_text="", categoryorder="total ascending")
+        fig.update_xaxes(title_text="Trips", tickformat="~s")
+        fig.update_layout(title_x=0.5)
+        fig.show()
+        return fig
+
+    def plot_holiday_trips_top_neighborhoods_pu(
+        self,
+        df: pd.DataFrame,
+        top_n: int = 10,
+        title: str = "Holiday - top pickup neighborhoods by trips",
     ):
         d = df.head(top_n).copy()
         fig = px.bar(
@@ -402,33 +374,23 @@ class TaxiCharts:
         fig.show()
         return fig
 
-    def plot_borough_season_temp_heatmap(
+    def plot_holiday_trips_top_neighborhoods_do(
         self,
         df: pd.DataFrame,
-        metric: str = "total_revenue",
-        title: str = "Pickup borough x season x temp category",
+        top_n: int = 10,
+        title: str = "Holiday - top dropoff neighborhoods by trips",
     ):
-        """
-        Heatmap (facet per season) su una metrica (default total_revenue).
-        """
-        if metric not in df.columns:
-            raise ValueError(f"Metrica '{metric}' non presente. Colonne: {list(df.columns)}")
-
-        d = df.copy()
-        d["pickup_borough"] = d["pickup_borough"].astype(str)
-        d["season"] = d["season"].astype(str)
-        d["apparent_temperature_category"] = d["apparent_temperature_category"].astype(str)
-
-        fig = px.density_heatmap(
+        d = df.head(top_n).copy()
+        fig = px.bar(
             d,
-            x="apparent_temperature_category",
-            y="pickup_borough",
-            z=metric,
-            facet_col="season",
-            facet_col_wrap=2,
-            title=f"{title} ({metric})",
+            x="trips",
+            y="neighborhood_name",
+            orientation="h",
+            title=title,
             template="simple_white",
         )
+        fig.update_yaxes(title_text="", categoryorder="total ascending")
+        fig.update_xaxes(title_text="Trips", tickformat="~s")
         fig.update_layout(title_x=0.5)
         fig.show()
         return fig
@@ -476,17 +438,17 @@ if __name__ == "__main__":
     print("\nMax daily revenue - January 2025:")
     print(df_max_day)
 
-    # 5) Revenue by year & month (line chart)
-    df_rev = charts.q_revenue_by_year_month()
-    charts.plot_revenue_by_year_month(df_rev)
-
     # 6) Christmas Day slice (top neighborhoods)
     df_xmas_do = charts.q_christmas_day_trips_by_neighborhood_do()
     charts.plot_christmas_trips_top_neighborhoods_do(df_xmas_do, top_n=10)
     df_xmas = charts.q_christmas_day_trips_by_neighborhood_pu()
     charts.plot_christmas_trips_top_neighborhoods_pu(df_xmas, top_n=10)
 
-    # 7) Borough x season x temp category (heatmap)
-    df_bst = charts.q_pickup_borough_season_temp(start_date="2024-01-01", end_date="2024-04-01")
-    charts.plot_borough_season_temp_heatmap(df_bst, metric="total_revenue")
+    # 6) Holiday Day slice (top neighborhoods)
+
+    df_xmas = charts.q_holiday_day_trips_by_neighborhood_pu()
+    charts.plot_holiday_trips_top_neighborhoods_pu(df_xmas, top_n=10)
+    df_xmas_do = charts.q_holiday_day_trips_by_neighborhood_do()
+    charts.plot_holiday_trips_top_neighborhoods_do(df_xmas_do, top_n=10)
+
 

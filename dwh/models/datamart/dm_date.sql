@@ -15,7 +15,7 @@ WITH date_spine AS (
 )
 
 SELECT
-    -- Chiave surrogata (formato YYYYMMDD, es: 20240615)
+    -- Chiave surrogata (formato Y YYYMMDD, es: 20240615)
     CAST(strftime(date_value, '%Y%m%d') AS INTEGER) AS key_date,
 
     -- Data completa
@@ -51,7 +51,6 @@ SELECT
 CASE
     -- New Year's Day
     WHEN strftime(date_value, '%m-%d') = '01-01' THEN TRUE
-    -- Martin Luther King Jr. Day (3° lunedì di gennaio)
     -- Independence Day
     WHEN strftime(date_value, '%m-%d') = '07-04' THEN TRUE
     -- Veterans Day
